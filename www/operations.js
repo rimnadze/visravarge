@@ -15,8 +15,7 @@ module.exports = function(mongoUrl, cb){
         
         cb()
     })
-}
-        
+}       
 
 exports.respond = function(req, res){
     var urlpars = url.pars(req.url, true)
@@ -25,6 +24,29 @@ exports.respond = function(req, res){
     if(!(operation in functions)) return false
     
     functions[operation](req, res)
+}
+
+var functions = {
+    list:function(req, res){
+        
+    },
+    set:function(req, res){
+        if(req.method !== 'POST') { error(res, 'wrong-method'); return }
+        readPostPars(function(err, pars){
+            if(err) { error(res, 'post-read-error', err); return }
+            
+            todoColl.insert()
+        })
+    },
+    signup:function(req, res){
+        
+    },
+    login:function(req, res){
+        
+    },
+    logout:function(req, res){
+        
+    },
 }
 
 function readPost(req, cb){
@@ -40,30 +62,20 @@ function readPost(req, cb){
 
 function readPostPars(req, cb){
     readPost(function(err, buffer){
+        if(err) { cb(err); return }
         postquery = querystring.parse(decodeURIComponent(buffer.toString()))
         
+        cb(null, postquery)
     })
 }
 
-var functions = {
-    list:function(req, res){
-        
-    },
-    add:function(req, res){
-        readPostPars(function(err, pars){
-            
-        })
-    },
-    change:function(req, res){
-        
-    },
-    signup:function(req, res){
-        
-    },
-    login:function(req, res){
-        
-    },
-    logout:function(req, res){
-        
-    },
+function badrequest(res, message){
+    console.trace(message)
+    res.statusCode = 400
+    res.end(message)
+}
+function error(res, message, err){
+    console.trace(err)
+    res.statusCode = 500
+    res.end(message)
 }
